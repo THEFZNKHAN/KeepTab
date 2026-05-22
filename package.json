@@ -1,0 +1,42 @@
+{
+  "name": "keeptab",
+  "version": "2.0.0",
+  "description": "Open-source Chrome extension to save tabs, links, and notes while browsing. Local-first board with optional Google Keep checklist sync.",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "homepage": "https://github.com/THEFZNKHAN/KeepTab#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/THEFZNKHAN/KeepTab.git"
+  },
+  "bugs": {
+    "url": "https://github.com/THEFZNKHAN/KeepTab/issues"
+  },
+  "keywords": [
+    "chrome-extension",
+    "manifest-v3",
+    "google-keep",
+    "bookmark-manager",
+    "tab-manager",
+    "save-tabs",
+    "link-saver",
+    "note-taking",
+    "productivity",
+    "typescript",
+    "open-source",
+    "privacy",
+    "local-first"
+  ],
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "test": "node scripts/build-test.mjs && node --test tests/*.test.mjs",
+    "watch": "node scripts/build.mjs --watch",
+    "icons": "node scripts/generate-icons.mjs"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.0.287",
+    "esbuild": "^0.25.0",
+    "typescript": "^5.7.3"
+  }
+}
