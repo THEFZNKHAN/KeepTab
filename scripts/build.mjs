@@ -19,11 +19,6 @@ const common = {
 
 const builds = [
   {
-    entryPoints: [join(root, "src/content/main.ts")],
-    outfile: join(dist, "content.js"),
-    format: "iife",
-  },
-  {
     entryPoints: [join(root, "src/background/main.ts")],
     outfile: join(dist, "background.js"),
     format: "iife",

@@ -5,8 +5,6 @@
   "description": "Save tabs, links, and notes to a personal board. One-click capture, clipboard export, optional Google Keep sync. Private and local.",
   "permissions": ["storage", "tabs", "scripting", "debugger"],
   "host_permissions": [
-    "http://*/*",
-    "https://*/*",
     "https://keep.google.com/*"
   ],
   "action": {
@@ -21,13 +19,6 @@
   "background": {
     "service_worker": "dist/background.js"
   },
-  "content_scripts": [
-    {
-      "matches": ["http://*/*", "https://*/*"],
-      "js": ["dist/content.js"],
-      "run_at": "document_idle"
-    }
-  ],
   "icons": {
     "16": "icons/icon16.png",
     "32": "icons/icon32.png",

@@ -92,7 +92,7 @@ You find something worth keeping — a product page, a docs link, a reminder —
 
 That adds friction dozens of times a day. KeepTab reduces it to **save, next**.
 
-Stay on the page you are already on. Click the bookmark button or open the popup, and KeepTab stores a clean entry locally. If you enable Keep sync, each save can append a formatted line to your checklist note in the background.
+Stay on the page you are already on. Open the popup and click the tab icon to save, or paste a link or note. KeepTab stores a clean entry locally. If you enable Keep sync, each save can append a formatted line to your checklist note in the background.
 
 No spreadsheet middleman. No manual formatting. No account required.
 
@@ -112,7 +112,7 @@ npm run build
 
 1. Open `chrome://extensions`, enable **Developer mode**, click **Load unpacked**, and select the `KeepTab` folder.
 2. Pin KeepTab to your Chrome toolbar.
-3. Visit any website and click the black **bookmark** button at the bottom-right.
+3. Visit any website, open the KeepTab popup, and click the **tab icon** to save the current page.
 4. Open the KeepTab popup to see your saved item.
 
 Want automatic Keep sync? Jump to [Google Keep sync](#google-keep-sync).
@@ -125,7 +125,6 @@ Want automatic Keep sync? Jump to [Google Keep sync](#google-keep-sync).
 flowchart LR
   subgraph capture [Capture]
     PopupSave[Popup input or Save tab]
-    PageBtn[Page bookmark button]
   end
   subgraph core [Background]
     BG[Service worker]
@@ -138,7 +137,6 @@ flowchart LR
     Keep[Google Keep optional]
   end
   PopupSave --> BG
-  PageBtn --> BG
   BG --> Storage
   BG --> Format
   BG --> Keep
@@ -146,7 +144,7 @@ flowchart LR
   Storage --> Badge
 ```
 
-1. **Capture** — Save from the popup (link, note, or current tab) or from the floating bookmark button on any page.
+1. **Capture** — Save from the popup: paste a link or note, or capture the current tab with the tab icon.
 2. **Store** — The background service worker deduplicates and persists items in `chrome.storage.local`.
 3. **Use** — View, copy, or delete items in the popup. Optionally append each save to Google Keep.
 
@@ -158,7 +156,6 @@ flowchart LR
 
 - **Save from popup** — Paste a URL or type a note in the input field and click **Save**
 - **Save current tab** — Tab icon button in the popup captures the active tab's title and URL
-- **Save from any page** — Floating bookmark button on all `http://` and `https://` pages
 - **Smart input** — Valid URLs save as links; plain text saves as notes
 - **Duplicate detection** — Same URL or note text is not saved twice
 
@@ -194,7 +191,7 @@ KeepTab works well when you need a fast, private capture tool instead of a full 
 
 | Scenario | How KeepTab helps |
 |----------|-------------------|
-| **Research tabs** | Save docs, articles, and reference pages with one click from the floating bookmark button |
+| **Research tabs** | Save docs, articles, and reference pages with the popup tab icon |
 | **Shopping comparisons** | Collect product URLs and short notes before deciding what to buy |
 | **Developer bookmarks** | Stash GitHub repos, Stack Overflow threads, and API docs in a clean export format |
 | **Meeting follow-ups** | Jot quick action items in the popup and copy them into Slack or email |
@@ -209,7 +206,7 @@ KeepTab stores three internal item types. They are not shown as badges in the UI
 
 | Type | How it is saved | Stored fields |
 |------|-----------------|---------------|
-| **Tab** | Save current tab (popup) or page bookmark button | Page title, full URL, optional favicon |
+| **Tab** | Save current tab from the popup | Page title, full URL, optional favicon |
 | **Link** | Paste a URL in the popup input | Derived title (host + path), full URL |
 | **Note** | Paste or type non-URL text in the popup input | Note body, short display title |
 
@@ -319,11 +316,6 @@ The item appears in your board with the page host/path as the subtitle.
 2. Open the KeepTab popup
 3. Click the **tab icon** next to the input field
 
-**From the page:**
-
-1. Click the black **bookmark** button at the bottom-right of the page
-2. A toast confirms the save (or reports a duplicate)
-
 ### Copy items
 
 - **Copy all** — Copies every item on the board as formatted lines
@@ -430,11 +422,9 @@ All processing happens in your browser. Keep sync writes directly to your Google
 | `tabs` | Read the active tab's title and URL when you save a tab |
 | `scripting` | Run the Keep list-append helper on `keep.google.com` |
 | `debugger` | Insert trusted keyboard input so Google Keep persists checklist items |
-| `http://*/*` | Inject the floating save button on regular web pages |
-| `https://*/*` | Same as above for HTTPS pages |
 | `https://keep.google.com/*` | Open and update your Keep checklist note during sync |
 
-KeepTab does **not** read page content, passwords, or form data. It only captures the page title and URL when you explicitly save.
+KeepTab does **not** inject UI into web pages. It only captures the page title and URL when you explicitly save from the popup.
 
 ---
 
@@ -468,7 +458,6 @@ The manifest points to `dist/`:
 ```
 dist/
   background.js   ← Service worker
-  content.js      ← Page bookmark button + toasts
   popup.html      ← Popup shell
   popup.css       ← Popup styles
   popup.js        ← Popup logic
@@ -498,10 +487,6 @@ KeepTab/
 ├── src/
 │   ├── background/
 │   │   └── main.ts            # Message router, badge init, Keep hook
-│   ├── content/
-│   │   ├── main.ts            # Page save button entry
-│   │   ├── ui.ts              # Floating button + toast styles
-│   │   └── keep-feedback.ts   # Save/Keep toast messaging
 │   ├── popup/
 │   │   ├── popup.html         # Board + settings + confirm dialog
 │   │   ├── popup.css          # Design tokens and layout
@@ -531,7 +516,7 @@ KeepTab/
 
 ### Message flow
 
-The popup and content script communicate with the background service worker through a typed message bus:
+The popup communicates with the background service worker through a typed message bus:
 
 | Action | Description |
 |--------|-------------|
@@ -583,7 +568,7 @@ All tests use Node's built-in test runner with mocked `chrome.storage`.
 
 **Does KeepTab work on `chrome://` pages?**
 
-No. Chrome blocks extensions from injecting content scripts on browser internal pages. Use **Save current tab** from the popup instead.
+No. Chrome blocks extensions from reading tabs on browser internal pages (`chrome://`, etc.). Navigate to a regular website first, then use **Save current tab** from the popup.
 
 **Why does KeepTab need the `debugger` permission?**
 
@@ -615,7 +600,7 @@ KeepTab and [KeepShelf](../TrackBuddy) share the same architecture (TypeScript, 
 
 ### Extension won't load
 
-- Run `npm run build` and confirm `dist/` contains `background.js`, `content.js`, `popup.js`, `popup.html`, and `popup.css`
+- Run `npm run build` and confirm `dist/` contains `background.js`, `popup.js`, `popup.html`, and `popup.css`
 - Run `npm run icons` if icon files are missing from `icons/`
 - Load the **repo root folder**, not `dist/` alone
 
